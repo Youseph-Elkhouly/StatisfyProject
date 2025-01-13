@@ -24,22 +24,22 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Check for required fields
-        if (!formData.full_name || !formData.email || !formData.address || !formData.graduation_date || !formData.school || !formData.major || !formData.gpa) {
+    
+        // Check if all required fields are filled
+        if (!formData.full_name || !formData.email || !formData.address || !formData.graduation_date || !formData.school || !formData.major) {
             setError("Please fill in all required fields.");
             return;
         }
-
+    
         try {
             const response = await fetch("http://localhost:3000/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
-
+    
             if (response.ok) {
-                navigate("/"); // Redirect to login page
+                navigate("/"); // Redirect after successful registration
             } else {
                 setError("Registration failed. Please try again.");
             }
@@ -47,6 +47,10 @@ const Register = () => {
             setError("An error occurred. Please try again.");
         }
     };
+    
+    
+    
+    
 
     return (
         <Container maxWidth="sm">

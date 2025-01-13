@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   app:
     build: .
@@ -6,10 +8,10 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_HOST=db   # Ensure this matches the service name for PostgreSQL in Docker Compose
+      - DATABASE_HOST=db      # Correct service name
       - DATABASE_PORT=5432
       - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=postgres
+      - DATABASE_PASSWORD=yoyo2015
       - DATABASE_NAME=myappdb
 
   db:
@@ -17,7 +19,7 @@ services:
     container_name: postgres_container
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: yoyo2015
       POSTGRES_DB: myappdb
     ports:
       - "5432:5432"

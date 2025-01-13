@@ -4,7 +4,7 @@ const { Pool } = require("pg");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
-const PORT = 3000;
+const PORT = 3002;
 
 // Enable CORS
 app.use(cors({
@@ -21,7 +21,7 @@ const pool = new Pool({
     host: process.env.DATABASE_HOST || "localhost",
     port: process.env.DATABASE_PORT || 5432,
     user: process.env.DATABASE_USER || "postgres",
-    password: process.env.DATABASE_PASSWORD || "postgres",
+    password: process.env.DATABASE_PASSWORD || "yoyo2015",
     database: process.env.DATABASE_NAME || "myappdb",
 });
 
@@ -38,6 +38,17 @@ app.get("/", (req, res) => {
         <p>Don't have an account? <a href="/register">Register here</a></p>
     `);
 });
+
+app.get("/db-test", async (req, res) => {
+    try {
+        await pool.query("SELECT 1");  // Simple query to check the connection
+        res.send("Database connection successful!");
+    } catch (err) {
+        console.error("Database connection error:", err.message);
+        res.status(500).send("Failed to connect to the database");
+    }
+});
+
 
 // Handle user login
 app.post("/login", async (req, res) => {
@@ -59,6 +70,7 @@ app.post("/login", async (req, res) => {
 });
 
 // Handle user registration
+// Handle user registration
 app.post("/register", async (req, res) => {
     const {
         full_name,
@@ -71,6 +83,8 @@ app.post("/register", async (req, res) => {
         minor,
         gpa,
     } = req.body;
+
+    console.log("Received data:", req.body);  // Log the received data
 
     if (!full_name || !email || !address || !graduation_date || !school || !major) {
         return res.status(400).send("Missing required fields");
@@ -90,6 +104,10 @@ app.post("/register", async (req, res) => {
         res.status(500).send(`Error registering user: ${err.message}`);
     }
 });
+
+
+
+
 
 // User account page
 app.get("/user/:id", async (req, res) => {
@@ -119,5 +137,45 @@ app.get("/user/:id", async (req, res) => {
         res.status(500).send("Error fetching user");
     }
 });
+
+// Serve the registration form
+app.get("/register", (req, res) => {
+    res.send(`
+        <form action="/register" method="POST">
+            <label for="full_name">Full Name:</label><br>
+            <input type="text" id="full_name" name="full_name" required><br><br>
+
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required><br><br>
+
+            <label for="address">Address:</label><br>
+            <textarea id="address" name="address" required></textarea><br><br>
+
+            <label for="graduation_date">Graduation Date:</label><br>
+            <input type="date" id="graduation_date" name="graduation_date" required><br><br>
+
+            <label for="is_canadian_citizen">Are you a Canadian Citizen?</label><br>
+            <select id="is_canadian_citizen" name="is_canadian_citizen" required>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select><br><br>
+
+            <label for="school">School:</label><br>
+            <input type="text" id="school" name="school" required><br><br>
+
+            <label for="major">Major:</label><br>
+            <input type="text" id="major" name="major" required><br><br>
+
+            <label for="minor">Minor:</label><br>
+            <input type="text" id="minor" name="minor"><br><br>
+
+            <label for="gpa">GPA:</label><br>
+            <input type="number" step="0.01" id="gpa" name="gpa" required><br><br>
+
+            <button type="submit">Register</button>
+        </form>
+    `);
+});
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
