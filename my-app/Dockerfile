@@ -5,7 +5,7 @@ FROM node:16
 WORKDIR /app
 
 # Copy package.json and package-lock.json files to the working directory
-COPY package*.json ./
+COPY package*.json ./ 
 
 # Install application dependencies
 RUN npm install
@@ -13,8 +13,8 @@ RUN npm install
 # Copy the rest of the application code to the working directory
 COPY . .
 
-# Expose the application port
-EXPOSE 3000
+# Expose the application port (backend is running on 3004)
+EXPOSE 3004
 
 # Start the application
 CMD ["node", "index.js"]

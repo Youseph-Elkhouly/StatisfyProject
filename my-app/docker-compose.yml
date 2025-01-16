@@ -4,15 +4,18 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - "3004:3004"
     depends_on:
       - db
     environment:
-      - DATABASE_HOST=db      # Correct service name
+      - DATABASE_HOST=db
       - DATABASE_PORT=5432
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=yoyo2015
       - DATABASE_NAME=myappdb
+    command: ["npm", "start"]
+    networks:
+      - my-network
 
   db:
     image: postgres:14
@@ -23,3 +26,14 @@ services:
       POSTGRES_DB: myappdb
     ports:
       - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data  # Ensures data persists
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
+
+volumes:
+  db_data:   # This defines the persistent volume

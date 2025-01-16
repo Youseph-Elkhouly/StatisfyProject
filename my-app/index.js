@@ -4,11 +4,11 @@ const { Pool } = require("pg");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
-const PORT = 3002;
+const PORT = 3004;
 
 // Enable CORS
 app.use(cors({
-    origin: "http://localhost:3001", // Allow frontend from port 3001
+    origin: "http://localhost:3000", // Allow frontend from port 3000 to access this server
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
 }));
@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // PostgreSQL connection pool
 const pool = new Pool({
-    host: process.env.DATABASE_HOST || "localhost",
+    host: process.env.DATABASE_HOST || "db",
     port: process.env.DATABASE_PORT || 5432,
     user: process.env.DATABASE_USER || "postgres",
     password: process.env.DATABASE_PASSWORD || "yoyo2015",
