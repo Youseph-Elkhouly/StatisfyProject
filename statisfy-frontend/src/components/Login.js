@@ -11,7 +11,7 @@ const Login = () => {
         e.preventDefault();
     
         try {
-            const response = await fetch("http://localhost:3000/login", {  // Make sure this is correct
+            const response = await fetch("http://localhost:3004/login", {  // Make sure this is correct
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),

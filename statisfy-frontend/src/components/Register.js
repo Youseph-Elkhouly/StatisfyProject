@@ -32,7 +32,7 @@ const Register = () => {
         }
     
         try {
-            const response = await fetch("http://localhost:3002/register", {  // Update port if changed
+            const response = await fetch("http://localhost:3004/register", {  // Update port if changed
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),

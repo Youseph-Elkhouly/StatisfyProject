@@ -8,7 +8,7 @@ const Account = () => {
 
     useEffect(() => {
         const fetchUser = async () => {
-            const response = await fetch(`http://localhost:3000/user/${id}`);
+            const response = await fetch(`http://localhost:3004/user/${id}`);
             const data = await response.json();
             setUser(data);
         };
