@@ -16,14 +16,14 @@ interface User {
 const Account: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Fetch the logged-in user's data from the backend
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const email = localStorage.getItem("email"); // Assuming you store the user's email after login
+        const email = localStorage.getItem("email");
         if (!email) {
-          throw new Error("No email found in local storage.");
+          throw new Error("No email found in local storage. Please log in.");
         }
 
         const response = await fetch(`http://localhost:3004/user/${email}`, {
@@ -34,33 +34,39 @@ const Account: React.FC = () => {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch user data");
+          throw new Error("Failed to fetch user data. Please try again later.");
         }
 
-        const data = await response.json();
+        const data: User = await response.json();
         setUser(data);
       } catch (error: unknown) {
         if (error instanceof Error) {
           setError(error.message);
         } else {
-          setError("An unexpected error occurred");
+          setError("An unexpected error occurred.");
         }
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchUserData();
   }, []);
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!user) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
+  if (error) {
+    return <div style={{ color: "red" }}>Error: {error}</div>;
+  }
+
+  if (!user) {
+    return <div>No user data available.</div>;
+  }
+
   return (
-    <div>
+    <div style={{ padding: "20px", maxWidth: "600px", margin: "auto", textAlign: "left" }}>
       <h1>Account Page</h1>
       <p><strong>Full Name:</strong> {user.full_name}</p>
       <p><strong>Email:</strong> {user.email}</p>

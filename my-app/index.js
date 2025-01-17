@@ -25,18 +25,23 @@ const pool = new Pool({
     database: process.env.DATABASE_NAME || "myappdb",
 });
 
-// Serve the login page
-app.get("/", (req, res) => {
-    res.send(`
-        <h1>Login</h1>
-        <form action="/login" method="POST">
-            <label for="email">Email:</label><br>
-            <input type="email" id="email" name="email" required><br><br>
-            <button type="submit">Login</button>
-        </form>
-        <br>
-        <p>Don't have an account? <a href="/register">Register here</a></p>
-    `);
+app.get('/user/:email', async (req, res) => {
+    const { email } = req.params;
+    console.log('Received email:', email); // Debug log
+
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (result.rows.length === 0) {
+            console.log('No user found for email:', email);
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        console.log('Fetched user:', result.rows[0]); // Debug log
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Database query failed:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 app.get("/db-test", async (req, res) => {
@@ -49,27 +54,28 @@ app.get("/db-test", async (req, res) => {
     }
 });
 
-
 // Handle user login
 app.post("/login", async (req, res) => {
     const { email } = req.body;
+
+    console.log("Login attempt for email:", email); // Debug log
 
     try {
         const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
 
         if (result.rows.length === 0) {
-            return res.status(404).send("No account found with the provided email.");
+            console.log("No account found for email:", email); // Debug log
+            return res.status(404).json({ error: "No account found with the provided email." });
         }
 
-        // Send the user details back
-        res.json(result.rows[0]);
+        console.log("User found:", result.rows[0]); // Debug log
+        res.json(result.rows[0]); // Ensure 'id' is included in response
     } catch (err) {
-        console.error("Error logging in:", err.message);
+        console.error("Error during login:", err.message);
         res.status(500).send("Error logging in");
     }
 });
 
-// Handle user registration
 // Handle user registration
 app.post("/register", async (req, res) => {
     const {
@@ -105,38 +111,32 @@ app.post("/register", async (req, res) => {
     }
 });
 
-
-
-
-
-// User account page
-app.get("/user/:id", async (req, res) => {
-    const { id } = req.params;
-
+app.get('/user', async (req, res) => {
+    const { email, id } = req.query;
     try {
-        const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-        if (result.rows.length === 0) {
-            return res.status(404).send("User not found");
+        let query = '';
+        let value = '';
+        if (id) {
+            query = 'SELECT * FROM users WHERE id = $1';
+            value = id;
+        } else if (email) {
+            query = 'SELECT * FROM users WHERE email = $1';
+            value = email;
+        } else {
+            return res.status(400).json({ error: 'Email or ID required' });
         }
 
-        const user = result.rows[0];
-        res.send(`
-            <h1>Welcome, ${user.full_name}</h1>
-            <p>Email: ${user.email}</p>
-            <p>Address: ${user.address}</p>
-            <p>Graduation Date: ${user.graduation_date}</p>
-            <p>School: ${user.school}</p>
-            <p>Major: ${user.major}</p>
-            <p>Minor: ${user.minor}</p>
-            <p>GPA: ${user.gpa}</p>
-            <br>
-            <a href="/">Log out</a>
-        `);
+        const result = await pool.query(query, [value]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(result.rows[0]);
     } catch (err) {
-        console.error("Error fetching user:", err.message);
-        res.status(500).send("Error fetching user");
+        console.error('Database query failed:', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 // Serve the registration form
 app.get("/register", (req, res) => {
@@ -176,6 +176,5 @@ app.get("/register", (req, res) => {
         </form>
     `);
 });
-
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

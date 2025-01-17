@@ -5,17 +5,28 @@ import { Container, Typography, Box, Card, CardContent } from "@mui/material";
 const Account = () => {
     const { id } = useParams();
     const [user, setUser] = useState(null);
+    const [error, setError] = useState("");
 
     useEffect(() => {
+        console.log("Fetching user data for ID:", id);
+
         const fetchUser = async () => {
-            const response = await fetch(`http://localhost:3004/user/${id}`);
-            const data = await response.json();
-            setUser(data);
+            const userId = id || localStorage.getItem("userId");
+            try {
+                const response = await fetch(`http://localhost:3004/user?id=${userId}`);
+                if (!response.ok) throw new Error("Failed to fetch user data.");
+                const data = await response.json();
+                setUser(data);
+            } catch (err) {
+                setError("Unable to fetch user data. Please try again later.");
+            }
         };
+        
 
         fetchUser();
     }, [id]);
 
+    if (error) return <p style={{ color: "red" }}>{error}</p>;
     if (!user) return <p>Loading...</p>;
 
     return (

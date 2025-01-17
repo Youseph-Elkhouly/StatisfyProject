@@ -9,26 +9,44 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
+        console.log("Submitting login for email:", email);
+
+        if (!email) {
+            setError("Please enter a valid email address.");
+            return;
+        }
+
         try {
-            const response = await fetch("http://localhost:3004/login", {  // Make sure this is correct
+            const response = await fetch("http://localhost:3004/login", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({ email }),
             });
-    
+
             if (response.ok) {
                 const user = await response.json();
-                navigate(`/account/${user.id}`);
+                console.log("User fetched from backend:", user);
+
+                if (user.id) {
+                    // Save user ID in localStorage for later use
+                    localStorage.setItem("userId", user.id);
+                    navigate(`/account/${user.id}`);
+                } else {
+                    console.error("User ID is missing from response");
+                    setError("Invalid response from the server.");
+                }
             } else {
+                console.error("Login failed with status:", response.status);
                 setError("Login failed. Please check your email.");
             }
         } catch (err) {
+            console.error("Error during login request:", err);
             setError("An error occurred. Please try again.");
         }
     };
-    
-    
 
     return (
         <Container maxWidth="sm">
