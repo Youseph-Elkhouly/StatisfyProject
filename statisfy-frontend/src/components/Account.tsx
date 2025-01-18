@@ -13,11 +13,20 @@ interface User {
   gpa: string;
 }
 
+interface Email {
+  id: string;
+  subject: string;
+  snippet: string;
+}
+
 const Account: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [emails, setEmails] = useState<Email[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [emailLoading, setEmailLoading] = useState<boolean>(false);
 
+  // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -53,6 +62,39 @@ const Account: React.FC = () => {
     fetchUserData();
   }, []);
 
+  // Gmail authentication handler
+  const handleAuth = () => {
+    window.location.href = "http://localhost:3004/auth";
+  };
+
+  // Fetch emails
+  const fetchEmails = async () => {
+    setEmailLoading(true);
+    try {
+      const response = await fetch("http://localhost:3004/fetch-emails", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch emails. Please authenticate first.");
+      }
+
+      const data: Email[] = await response.json();
+      setEmails(data);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("An unexpected error occurred while fetching emails.");
+      }
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -76,6 +118,33 @@ const Account: React.FC = () => {
       <p><strong>Major:</strong> {user.major}</p>
       <p><strong>Minor:</strong> {user.minor}</p>
       <p><strong>GPA:</strong> {user.gpa}</p>
+
+      {/* Gmail API Features */}
+      <div style={{ marginTop: "20px" }}>
+        <h2>Gmail Integration</h2>
+        <button onClick={handleAuth} style={{ marginRight: "10px" }}>
+          Authenticate with Gmail
+        </button>
+        <button onClick={fetchEmails} disabled={emailLoading}>
+          {emailLoading ? "Fetching Emails..." : "Fetch Emails"}
+        </button>
+      </div>
+
+      {/* Display Emails */}
+      {emails.length > 0 && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>Fetched Emails</h3>
+          <ul>
+            {emails.map((email) => (
+              <li key={email.id}>
+                <strong>Subject:</strong> {email.subject || "No Subject"}
+                <br />
+                <strong>Snippet:</strong> {email.snippet}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

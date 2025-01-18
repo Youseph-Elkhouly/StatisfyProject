@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build:
+      context: ..
+      dockerfile: my-app/Dockerfile
     ports:
       - "3004:3004"
     depends_on:
@@ -13,6 +15,9 @@ services:
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=yoyo2015
       - DATABASE_NAME=myappdb
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/statisfy-backend/credentials.json
+    volumes:
+      - ../statisfy-backend:/app/statisfy-backend
     command: ["npm", "start"]
     networks:
       - my-network
